@@ -13,13 +13,17 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.liambrem.trackr",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.liambrem.trackr",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -27,10 +31,25 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "503422d2-cf71-409d-968d-4a92ab5bd0c0"
+      }
     }
   }
 }

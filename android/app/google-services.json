@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "67700638652",
+    "project_id": "trackr-6477e",
+    "storage_bucket": "trackr-6477e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67700638652:android:8d8ff48cc36eb4d43ea1b9",
+        "android_client_info": {
+          "package_name": "com.liambrem.trackr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "67700638652-kncsdmjvnhvo0bf2hii9obufmo1pf7tu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.liambrem.trackr",
+            "certificate_hash": "58bffbe3eb73e2ebfb51c3484ece9bc522ee3c9e"
+          }
+        },
+        {
+          "client_id": "67700638652-9tmhhterb8thg438n0jlgcqi1acclbm0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARcgZZqbf1NtFh2Jcmzn8-fJ4aduqWQQw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "67700638652-9tmhhterb8thg438n0jlgcqi1acclbm0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "67700638652-etqpknqud7q4ro883af2g6hqabrnhbi8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.liambrem.trackr"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
