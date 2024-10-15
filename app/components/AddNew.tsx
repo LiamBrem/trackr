@@ -5,10 +5,19 @@ import { useState } from 'react';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth'; // Import Firebase Authentication
 
+type Application = {
+  name: string;
+  position: string;
+  date: Date;  // Make sure to use the correct type for date
+  status: string;
+};
+
 type Props = PropsWithChildren<{
   isVisible: boolean;
   onClose: () => void;
+  onSubmit: (newApplication: Application) => Promise<void>; // Add onSubmit here
 }>;
+
 
 export default function AddNew({ isVisible, children, onClose }: Props) {
   const [name, setName] = useState('');

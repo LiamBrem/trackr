@@ -1,12 +1,83 @@
-import { Text, View, StyleSheet, Button, Pressable } from 'react-native';
-import { Link, router } from "expo-router";
-import { useState } from 'react';
+import { Text, View, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { useState, useEffect } from 'react';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 import AddNew from '@/app/components/AddNew';
+import AppCard from '@/app/components/AppCard';
 
+type Application = {
+  name: string;
+  position: string;
+  date: Date;
+  status: string;
+};
 
 export default function History() {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [applications, setApplications] = useState<Application[]>([]);
+
+  const currentUserUID = auth().currentUser?.uid;
+
+  // Fetch applications from Firestore
+  const fetchApplications = async () => {
+    try {
+      const userId = currentUserUID;
+      const querySnapshot = await firestore()
+        .collection('users')
+        .doc(userId)
+        .collection('applications')
+        .get();
+
+      const fetchedApplications: Application[] = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        const date = new Date(data.date); // Convert the date string to a Date object
+        return {
+          name: data.name,
+          position: data.position,
+          date: date,
+          status: data.status,
+        };
+      });
+
+      // Sort applications by date (most recent first)
+      fetchedApplications.sort((a, b) => b.date.getTime() - a.date.getTime());
+      setApplications(fetchedApplications);
+    } catch (error) {
+      console.log("Error fetching applications:", error);
+    }
+  };
+
+  // Fetch applications on component mount or when a new application is added
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  // Add a new application to Firestore and update state
+  const handleAddNewApplication = async (newApplication: Application) => {
+    try {
+      const userId = currentUserUID;
+
+      // Add the new application to Firestore
+      await firestore()
+        .collection('users')
+        .doc(userId)
+        .collection('applications')
+        .add({
+          ...newApplication,
+          date: firestore.FieldValue.serverTimestamp(), // Store as a Firebase Timestamp
+        });
+
+      // After adding the new application, refetch the applications
+      fetchApplications();
+
+      // Close the modal after submission
+      setIsModalVisible(false);
+
+    } catch (error) {
+      console.log("Error adding new application:", error);
+    }
+  };
 
   const onAddSticker = () => {
     setIsModalVisible(true);
@@ -16,16 +87,31 @@ export default function History() {
     setIsModalVisible(false);
   };
 
-
   return (
     <View style={styles.container}>
       <Text style={styles.text}>History</Text>
+
+      <ScrollView style={styles.cardsContainer}>
+        {applications.map((application, index) => (
+          <AppCard
+            key={index}
+            name={application.name}
+            position={application.position}
+            date={application.date}
+            status={application.status}
+          />
+        ))}
+      </ScrollView>
+
       <Pressable style={styles.button} onPress={onAddSticker}>
         <Text style={styles.text}>ADD NEW</Text>
       </Pressable>
-      <AddNew isVisible={isModalVisible} onClose={onModalClose}>
-        {/* A list of emoji component will go here */}
-      </AddNew>
+
+      <AddNew
+        isVisible={isModalVisible}
+        onClose={onModalClose}
+        onSubmit={handleAddNewApplication}
+      />
     </View>
   );
 }
@@ -41,9 +127,9 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   button: {
-    position: 'absolute',  // Position the button at the bottom
-    bottom: 20,  // 20px from the bottom
-    width: '80%',  // Make the button take up 80% of the screen width
+    position: 'absolute',
+    bottom: 20,
+    width: '80%',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
@@ -52,8 +138,9 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: '#007AFF',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-  }
+  cardsContainer: {
+    width: '100%',
+    marginBottom: 80,
+    paddingHorizontal: 10,
+  },
 });
