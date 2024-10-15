@@ -1,9 +1,13 @@
 import { Text, View, StyleSheet } from 'react-native';
+import { Link } from 'expo-router';
 
 export default function History() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Settings</Text>
+      <Link href="/(auth)/(tabs)/home">
+        home
+      </Link>
     </View>
   );
 }
