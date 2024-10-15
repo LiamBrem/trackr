@@ -5,7 +5,6 @@ import auth from '@react-native-firebase/auth';
 export default function History() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Settings</Text>
       <View style={styles.container}>
             <Button title="Sign out" onPress={() => auth().signOut()} />
         </View>

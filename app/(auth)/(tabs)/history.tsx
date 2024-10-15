@@ -5,6 +5,7 @@ import auth from '@react-native-firebase/auth';
 
 import AddNew from '@/app/components/AddNew';
 import AppCard from '@/app/components/AppCard';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Application = {
   id: string;
@@ -17,7 +18,7 @@ type Application = {
 export default function History() {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [selectedApp, setSelectedApp] = useState<Application | null>(null); 
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
 
   const currentUserUID = auth().currentUser?.uid;
 
@@ -74,37 +75,37 @@ export default function History() {
     }
   };
 
-    // Handle editing an application (open modal with data)
-    const handleEdit = (application: Application) => {
-      setSelectedApp(application);
-      setIsModalVisible(true);
-    };
-  
-    // Handle deleting an application
-    const handleDelete = (id: string) => {
-      Alert.alert(
-        "Delete Application",
-        "Are you sure you want to delete this application?",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Delete",
-            onPress: async () => {
-              try {
-                await firestore()
-                  .collection('users')
-                  .doc(currentUserUID)
-                  .collection('applications')
-                  .doc(id)
-                  .delete();
-              } catch (error) {
-                console.log("Error deleting application:", error);
-              }
+  // Handle editing an application (open modal with data)
+  const handleEdit = (application: Application) => {
+    setSelectedApp(application);
+    setIsModalVisible(true);
+  };
+
+  // Handle deleting an application
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      "Delete Application",
+      "Are you sure you want to delete this application?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          onPress: async () => {
+            try {
+              await firestore()
+                .collection('users')
+                .doc(currentUserUID)
+                .collection('applications')
+                .doc(id)
+                .delete();
+            } catch (error) {
+              console.log("Error deleting application:", error);
             }
           }
-        ]
-      );
-    };
+        }
+      ]
+    );
+  };
 
   const onAddSticker = () => {
     setIsModalVisible(true);
@@ -115,37 +116,43 @@ export default function History() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>History</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
 
-      <ScrollView style={styles.cardsContainer}>
-        {applications.map((application, index) => (
-          <AppCard
-            key={index}
-            name={application.name}
-            position={application.position}
-            date={application.date}
-            status={application.status}
-            onEdit={() => handleEdit(application)}
-            onDelete={() => handleDelete(application.id)}
-          />
-        ))}
-      </ScrollView>
+        <ScrollView style={styles.cardsContainer}>
+          {applications.map((application, index) => (
+            <AppCard
+              key={index}
+              name={application.name}
+              position={application.position}
+              date={application.date}
+              status={application.status}
+              onEdit={() => handleEdit(application)}
+              onDelete={() => handleDelete(application.id)}
+            />
+          ))}
+        </ScrollView>
 
-      <Pressable style={styles.button} onPress={onAddSticker}>
-        <Text style={styles.text}>ADD NEW</Text>
-      </Pressable>
+          
+        <Pressable style={styles.button} onPress={onAddSticker}>
+          <Text style={styles.text}>ADD NEW</Text>
+        </Pressable>
 
-      <AddNew
-        isVisible={isModalVisible}
-        onClose={onModalClose}
-        onSubmit={handleAddNewApplication}
-      />
-    </View>
+        <AddNew
+          isVisible={isModalVisible}
+          onClose={onModalClose}
+          onSubmit={handleAddNewApplication}
+        />
+      </View>
+    </SafeAreaView> 
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#25292e',
+  },
   container: {
     flex: 1,
     backgroundColor: '#25292e',
@@ -157,7 +164,7 @@ const styles = StyleSheet.create({
   },
   button: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 0,
     width: '80%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -169,7 +176,7 @@ const styles = StyleSheet.create({
   },
   cardsContainer: {
     width: '100%',
-    marginBottom: 80,
+    marginBottom: 70,
     paddingHorizontal: 10,
   },
 });
