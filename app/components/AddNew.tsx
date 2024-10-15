@@ -1,11 +1,12 @@
 import { Modal, View, Text, Pressable, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { PropsWithChildren } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth'; // Import Firebase Authentication
 
 type Application = {
+  id: string;
   name: string;
   position: string;
   date: Date;  // Make sure to use the correct type for date
@@ -19,12 +20,22 @@ type Props = PropsWithChildren<{
 }>;
 
 
-export default function AddNew({ isVisible, children, onClose }: Props) {
+export default function AddNew({ isVisible, children, onClose, onSubmit }: Props) {
   const [name, setName] = useState('');
   const [position, setPosition] = useState('');
   const [date, setDate] = useState(new Date());
   const [status, setStatus] = useState<string>(''); // State for selected dropdown option
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Reset the form when the modal visibility changes
+  useEffect(() => {
+    if (!isVisible) {
+      setName('');
+      setPosition('');
+      setStatus('');
+      setDate(new Date()); // Reset the date field to current date
+    }
+  }, [isVisible]);
 
   const handleDateChange = (event: any, selectedDate: Date | undefined) => {
     setShowDropdown(false);
@@ -32,6 +43,11 @@ export default function AddNew({ isVisible, children, onClose }: Props) {
   };
 
   const handleSubmit = async () => {
+    if (!name || !position || !status) {
+      alert('Please fill in all fields!');
+      return;
+    }
+
     console.log('Name:', name);
     console.log('Position:', position);
     console.log('Date:', date.toString());  // Convert date to string

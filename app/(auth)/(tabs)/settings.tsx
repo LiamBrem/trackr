@@ -1,13 +1,14 @@
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, Button } from 'react-native';
 import { Link } from 'expo-router';
+import auth from '@react-native-firebase/auth';
 
 export default function History() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Settings</Text>
-      <Link href="/(auth)/(tabs)/home">
-        home
-      </Link>
+      <View style={styles.container}>
+            <Button title="Sign out" onPress={() => auth().signOut()} />
+        </View>
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { Text, View, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
 import { useState, useEffect } from 'react';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -7,6 +7,7 @@ import AddNew from '@/app/components/AddNew';
 import AppCard from '@/app/components/AppCard';
 
 type Application = {
+  id: string;
   name: string;
   position: string;
   date: Date;
@@ -16,44 +17,41 @@ type Application = {
 export default function History() {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null); 
 
   const currentUserUID = auth().currentUser?.uid;
 
-  // Fetch applications from Firestore
-  const fetchApplications = async () => {
-    try {
-      const userId = currentUserUID;
-      const querySnapshot = await firestore()
-        .collection('users')
-        .doc(userId)
-        .collection('applications')
-        .get();
+  // Fetch applications from Firestore with real-time listener
+  useEffect(() => {
+    const userId = currentUserUID;
 
-      const fetchedApplications: Application[] = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        const date = new Date(data.date); // Convert the date string to a Date object
-        return {
-          name: data.name,
-          position: data.position,
-          date: date,
-          status: data.status,
-        };
+    // Attach a snapshot listener to Firestore
+    const unsubscribe = firestore()
+      .collection('users')
+      .doc(userId)
+      .collection('applications')
+      .orderBy('date', 'desc')  // Ensure they're ordered by date
+      .onSnapshot((querySnapshot) => {
+        const fetchedApplications: Application[] = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          const date = new Date(data.date);  // Convert the date string to a Date object
+          return {
+            id: doc.id,
+            name: data.name,
+            position: data.position,
+            date: date,
+            status: data.status,
+          };
+        });
+
+        setApplications(fetchedApplications);  // Update state with new data
       });
 
-      // Sort applications by date (most recent first)
-      fetchedApplications.sort((a, b) => b.date.getTime() - a.date.getTime());
-      setApplications(fetchedApplications);
-    } catch (error) {
-      console.log("Error fetching applications:", error);
-    }
-  };
+    // Cleanup the listener when component unmounts or user logs out
+    return () => unsubscribe();
+  }, [currentUserUID]);  // The listener will trigger when currentUserUID changes
 
-  // Fetch applications on component mount or when a new application is added
-  useEffect(() => {
-    fetchApplications();
-  }, []);
-
-  // Add a new application to Firestore and update state
+  // Add a new application to Firestore
   const handleAddNewApplication = async (newApplication: Application) => {
     try {
       const userId = currentUserUID;
@@ -68,9 +66,6 @@ export default function History() {
           date: firestore.FieldValue.serverTimestamp(), // Store as a Firebase Timestamp
         });
 
-      // After adding the new application, refetch the applications
-      fetchApplications();
-
       // Close the modal after submission
       setIsModalVisible(false);
 
@@ -78,6 +73,38 @@ export default function History() {
       console.log("Error adding new application:", error);
     }
   };
+
+    // Handle editing an application (open modal with data)
+    const handleEdit = (application: Application) => {
+      setSelectedApp(application);
+      setIsModalVisible(true);
+    };
+  
+    // Handle deleting an application
+    const handleDelete = (id: string) => {
+      Alert.alert(
+        "Delete Application",
+        "Are you sure you want to delete this application?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            onPress: async () => {
+              try {
+                await firestore()
+                  .collection('users')
+                  .doc(currentUserUID)
+                  .collection('applications')
+                  .doc(id)
+                  .delete();
+              } catch (error) {
+                console.log("Error deleting application:", error);
+              }
+            }
+          }
+        ]
+      );
+    };
 
   const onAddSticker = () => {
     setIsModalVisible(true);
@@ -99,6 +126,8 @@ export default function History() {
             position={application.position}
             date={application.date}
             status={application.status}
+            onEdit={() => handleEdit(application)}
+            onDelete={() => handleDelete(application.id)}
           />
         ))}
       </ScrollView>

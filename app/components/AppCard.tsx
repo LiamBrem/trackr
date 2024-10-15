@@ -1,19 +1,42 @@
-// This will be for the cards that appear on history
-
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';  // For 3-dot icon
 
 type AppCardProps = {
   name: string;
   position: string;
   date: Date;
   status: string;
+  onEdit: () => void;
+  onDelete: () => void;
 };
 
-export default function AppCard({ name, position, date, status }: AppCardProps) {
+export default function AppCard({
+  name,
+  position,
+  date,
+  status,
+  onEdit,
+  onDelete,
+}: AppCardProps) {
   return (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>{name}</Text>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardTitle}>{name}</Text>
+        <TouchableOpacity onPress={() => {
+          Alert.alert(
+            "Actions",
+            "Choose an action",
+            [
+              { text: "Edit", onPress: onEdit },
+              { text: "Delete", onPress: onDelete },
+              { text: "Cancel", style: "cancel" }
+            ]
+          );
+        }}>
+          <MaterialIcons name="more-vert" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <Text style={styles.cardText}>Position: {position}</Text>
       <Text style={styles.cardText}>Date: {new Date(date).toLocaleDateString()}</Text>
       <Text style={styles.cardText}>Status: {status}</Text>
@@ -32,6 +55,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 5,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   cardTitle: {
     fontSize: 18,
