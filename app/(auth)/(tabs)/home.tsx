@@ -3,9 +3,22 @@ import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
+import PieChartComponent from '@/app/components/PieChart';
+
+
 const Page = () => {
   const [totalApplications, setTotalApplications] = useState<number>(0);
   const [offersCount, setOffersCount] = useState<number>(0);
+  const [statusCounts, setStatusCounts] = useState<{ [key: string]: number }>({
+    'Application Submitted': 0,
+    'OA Received': 0,
+    'OA Completed': 0,
+    'Interview': 0,
+    'Rejected': 0,
+    'Offer': 0,
+  });
+  const [loading, setLoading] = useState<boolean>(true); // New loading state
+
   const user = auth().currentUser;
 
   // Animated values
@@ -25,10 +38,29 @@ const Page = () => {
         .collection('applications')
         .onSnapshot((querySnapshot) => {
           const applications = querySnapshot.docs.map(doc => doc.data());
-          const offers = applications.filter(app => app.status.toLowerCase() === 'offer');
+
+          const statusCounter: { [key: string]: number } = {
+            'Application Submitted': 0,
+            'OA Received': 0,
+            'OA Completed': 0,
+            'Interview': 0,
+            'Rejected': 0,
+            'Offer': 0,
+          };
+
+          applications.forEach((app) => {
+            const status = app.status || 'Unknown';  // Handle if status is undefined
+            if (statusCounter[status] !== undefined) {
+              statusCounter[status] += 1;
+            }
+          });
+
+          //const offers = applications.filter(app => app.status.toLowerCase() === 'offer');
 
           setTotalApplications(applications.length);
-          setOffersCount(offers.length);
+          setOffersCount(statusCounter['Offer']);
+          setStatusCounts(statusCounter);
+          setLoading(false);
         });
 
       return () => unsubscribe();
@@ -65,6 +97,12 @@ const Page = () => {
     ]).start();
   }, []);
 
+  const widthAndHeight = 250;
+  const series = Object.values(statusCounts);
+  const sliceColor = ['#fbd203', '#ffb300', '#ff9100', '#ff6c00', '#ff3c00', '#98FB98'];
+  const isDataAvailable = series.reduce((a, b) => a + b, 0) > 0;
+
+
   return (
     <View style={styles.container}>
       <Text style={styles.pageTitle}>Dashboard</Text>
@@ -90,6 +128,17 @@ const Page = () => {
         <Text style={styles.cardText}>Offers Received</Text>
         <Text style={styles.statValue}>{offersCount}</Text>
       </Animated.View>
+      {loading ? (
+        <Text style={styles.loadingText}>Loading...</Text>  // Loading state
+      ) : isDataAvailable ? (
+        <PieChartComponent 
+          widthAndHeight={widthAndHeight}
+          series={series}
+          sliceColor={sliceColor}
+        />
+      ) : (
+        <Text style={styles.noDataText}>No data available to display</Text>  // Fallback if no data
+      )}
     </View>
   );
 };
@@ -140,5 +189,20 @@ const styles = StyleSheet.create({
     fontSize: 28, // Larger stat value font size for emphasis
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  chartContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 200, // Adjust as needed to position the chart properly
+  },
+  loadingText: {
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 50,
+  },
+  noDataText: {
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 50,
   },
 });
