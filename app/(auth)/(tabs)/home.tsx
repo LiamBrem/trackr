@@ -99,7 +99,7 @@ const Page = () => {
 
   const widthAndHeight = 250;
   const series = Object.values(statusCounts);
-  const sliceColor = ['#fbd203', '#ffb300', '#ff9100', '#ff6c00', '#ff3c00', '#98FB98'];
+  const sliceColor = ['#47CAFA', '#4177E1', '#2952B4', '#002A8C', '#DF3F64', '#81EE9E'];
   const isDataAvailable = series.reduce((a, b) => a + b, 0) > 0;
 
 

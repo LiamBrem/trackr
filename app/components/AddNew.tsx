@@ -123,22 +123,22 @@ export default function AddNew({ isVisible, children, onClose, onSubmit }: Props
           {showDropdown && (
             <View style={styles.dropdownMenu}>
               <TouchableOpacity onPress={() => setStatus('Application Submitted')}>
-                <Text style={[styles.dropdownOption, { backgroundColor: '#D0F0C0' }]}>Application Submitted</Text>
+                <Text style={[styles.dropdownOption, { backgroundColor: '#47CAFA' }]}>Application Submitted</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setStatus('OA Received')}>
-                <Text style={[styles.dropdownOption, { backgroundColor: '#B0E0E6' }]}>OA Received</Text>
+                <Text style={[styles.dropdownOption, { backgroundColor: '#4177E1' }]}>OA Received</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setStatus('OA Completed')}>
-                <Text style={[styles.dropdownOption, { backgroundColor: '#FFB6C1' }]}>OA Completed</Text>
+                <Text style={[styles.dropdownOption, { backgroundColor: '#2952B4' }]}>OA Completed</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setStatus('Interview')}>
-                <Text style={[styles.dropdownOption, { backgroundColor: '#FAD02E' }]}>Interview</Text>
+                <Text style={[styles.dropdownOption, { backgroundColor: '#002A8C' }]}>Interview</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setStatus('Rejected')}>
-                <Text style={[styles.dropdownOption, { backgroundColor: '#FF6347' }]}>Rejected</Text>
+                <Text style={[styles.dropdownOption, { backgroundColor: '#DF3F64' }]}>Rejected</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setStatus('Offer')}>
-                <Text style={[styles.dropdownOption, { backgroundColor: '#98FB98' }]}>Offer</Text>
+                <Text style={[styles.dropdownOption, { backgroundColor: '#81EE9E' }]}>Offer</Text>
               </TouchableOpacity>
             </View>
           )}
