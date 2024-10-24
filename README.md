@@ -6,4 +6,13 @@ Made with [React Native Expo](https://github.com/expo/expo) and [Firebase](https
 
 Built by Liam Brem & Ryan Fusco
 
-Members of Pitt CSC
+Members of [Pitt CSC](https://github.com/pittcsc)
+
+### To Do
+- OA Reminders
+- Notifications
+- Reset All In Settings + Build Out Settings Page
+- Logo & Splash Screen
+
+
+
