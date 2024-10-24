@@ -13,6 +13,8 @@ Members of [Pitt CSC](https://github.com/pittcsc)
 - Notifications
 - Reset All In Settings + Build Out Settings Page
 - Logo & Splash Screen
+- Accessability 
+- Export to CSV file
 
 
 
