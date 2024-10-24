@@ -11,6 +11,16 @@ type AppCardProps = {
   onDelete: () => void;
 };
 
+const statusColorMap: { [key: string]: string } = {
+  'Application Submitted': '#47CAFA', // Light Blue
+  'OA Received': '#4177E1',           // Medium Blue
+  'OA Completed': '#2952B4',          // Dark Blue
+  'Interview': '#002A8C',             // Navy Blue
+  'Rejected': '#DF3F64',              // Red
+  'Offer': '#81EE9E',                 // Green
+  'Unknown': '#ccc'                   // Default gray for unknown status
+};
+
 export default function AppCard({
   name,
   position,
@@ -19,6 +29,8 @@ export default function AppCard({
   onEdit,
   onDelete,
 }: AppCardProps) {
+  const statusColor = statusColorMap[status] || statusColorMap['Unknown'];
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -39,7 +51,10 @@ export default function AppCard({
       </View>
       <Text style={styles.cardText}>Position: {position}</Text>
       <Text style={styles.cardText}>Date: {new Date(date).toLocaleDateString()}</Text>
-      <Text style={styles.cardText}>Status: {status}</Text>
+      <View style={styles.statusContainer}>
+        <View style={[styles.statusSquare, { backgroundColor: statusColor }]} />
+        <Text style={styles.cardText}>Status: {status}</Text>
+      </View>
     </View>
   );
 }
@@ -70,5 +85,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     marginVertical: 5,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusSquare: {
+    width: 15,
+    height: 15,
+    marginRight: 10, // Adds space between the square and text
+    borderRadius: 2, // Optional, to make the square slightly rounded
   },
 });

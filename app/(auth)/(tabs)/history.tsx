@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
+import { Text, View, StyleSheet, Pressable, ScrollView, Alert, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -18,6 +18,7 @@ type Application = {
 export default function History() {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
 
   const currentUserUID = auth().currentUser?.uid;
@@ -57,6 +58,30 @@ export default function History() {
     try {
       const userId = currentUserUID;
 
+      if (selectedApp) {
+        // Update existing application
+        await firestore()
+          .collection('users')
+          .doc(userId)
+          .collection('applications')
+          .doc(selectedApp.id)
+          .update({
+            ...newApplication,
+            date: firestore.FieldValue.serverTimestamp(),
+          });
+      } else {
+        // Add new application
+        await firestore()
+          .collection('users')
+          .doc(userId)
+          .collection('applications')
+          .add({
+            ...newApplication,
+            date: firestore.FieldValue.serverTimestamp(),
+          });
+      }
+
+      {/*
       // Add the new application to Firestore
       await firestore()
         .collection('users')
@@ -66,9 +91,11 @@ export default function History() {
           ...newApplication,
           date: firestore.FieldValue.serverTimestamp(), // Store as a Firebase Timestamp
         });
+      */}
 
       // Close the modal after submission
       setIsModalVisible(false);
+      setSelectedApp(null);  // Reset selected app
 
     } catch (error) {
       console.log("Error adding new application:", error);
@@ -115,11 +142,36 @@ export default function History() {
     setIsModalVisible(false);
   };
 
+  const filteredApplications = applications.filter(app =>
+    app.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
 
+        {/* Search Bar */}
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search by company name"
+          placeholderTextColor="#aaa"
+          value={searchQuery}
+          onChangeText={text => setSearchQuery(text)}
+        />
+
         <ScrollView style={styles.cardsContainer}>
+        {filteredApplications.map((application, index) => (
+            <AppCard
+              key={index}
+              name={application.name}
+              position={application.position}
+              date={application.date}
+              status={application.status}
+              onEdit={() => handleEdit(application)}
+              onDelete={() => handleDelete(application.id)}
+            />
+          ))}
+          {/*
           {applications.map((application, index) => (
             <AppCard
               key={index}
@@ -131,6 +183,7 @@ export default function History() {
               onDelete={() => handleDelete(application.id)}
             />
           ))}
+          */}
         </ScrollView>
 
           
@@ -142,6 +195,7 @@ export default function History() {
           isVisible={isModalVisible}
           onClose={onModalClose}
           onSubmit={handleAddNewApplication}
+          application={selectedApp}
         />
       </View>
     </SafeAreaView> 
@@ -178,5 +232,14 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 70,
     paddingHorizontal: 10,
+  },
+  searchBar: {
+    width: '90%',
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#333',
+    color: '#fff',
+    paddingHorizontal: 10,
+    marginVertical: 10,
   },
 });

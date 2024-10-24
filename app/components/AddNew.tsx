@@ -3,7 +3,7 @@ import { PropsWithChildren } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useState, useEffect } from 'react';
 import firestore from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth'; // Import Firebase Authentication
+import auth, { applyActionCode } from '@react-native-firebase/auth'; // Import Firebase Authentication
 
 type Application = {
   id: string;
@@ -17,10 +17,11 @@ type Props = PropsWithChildren<{
   isVisible: boolean;
   onClose: () => void;
   onSubmit: (newApplication: Application) => Promise<void>; // Add onSubmit here
+  application?: Application | null; // Optional application prop
 }>;
 
 
-export default function AddNew({ isVisible, children, onClose, onSubmit }: Props) {
+export default function AddNew({ isVisible, children, onClose, onSubmit, application }: Props) {
   const [name, setName] = useState('');
   const [position, setPosition] = useState('');
   const [date, setDate] = useState(new Date());
@@ -34,8 +35,14 @@ export default function AddNew({ isVisible, children, onClose, onSubmit }: Props
       setPosition('');
       setStatus('');
       setDate(new Date()); // Reset the date field to current date
+    } else if (application) {
+      // Prepopulate the form with the application data when editing
+      setName(application.name);
+      setPosition(application.position);
+      setDate(application.date);
+      setStatus(application.status);
     }
-  }, [isVisible]);
+  }, [isVisible, application]);
 
   const handleDateChange = (event: any, selectedDate: Date | undefined) => {
     setShowDropdown(false);
@@ -62,19 +69,36 @@ export default function AddNew({ isVisible, children, onClose, onSubmit }: Props
     }
 
     try {
-      // Add the new application data to Firestore under the user's UID
-      await firestore()
-        .collection('users')  // 'users' collection
-        .doc(currentUserUID)  // document for the current user
-        .collection('applications')  // 'applications' sub-collection
-        .add({  // Add a new document
-          name: name,
-          position: position,
-          date: date.toString(),
-          status: status,
-        });
-
-      alert('Application Added!');
+      if (application) {
+        // If an application is passed, update the existing one
+        await firestore()
+          .collection('users')
+          .doc(currentUserUID)
+          .collection('applications')
+          .doc(application.id)  // Reference the document by ID for update
+          .update({
+            name,
+            position,
+            date: date.toString(),
+            status,
+          });
+  
+        alert('Application Updated!');
+      } else {
+        // If no application is passed, add a new one
+        await firestore()
+          .collection('users')
+          .doc(currentUserUID)
+          .collection('applications')
+          .add({
+            name,
+            position,
+            date: date.toString(),
+            status,
+          });
+  
+        alert('Application Added!');
+      }
 
     } catch (error) {
       console.error('Error adding application to Firestore:', error);
@@ -88,7 +112,7 @@ export default function AddNew({ isVisible, children, onClose, onSubmit }: Props
     <Modal animationType="slide" transparent={true} visible={isVisible}>
       <View style={styles.modalContent}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Add New Application</Text>
+          <Text style={styles.title}>{application ? 'Edit Application' : 'Add New Application'}</Text>
           <Pressable onPress={onClose}>
             <MaterialIcons name="close" color="#fff" size={22} />
           </Pressable>
@@ -122,29 +146,29 @@ export default function AddNew({ isVisible, children, onClose, onSubmit }: Props
 
           {showDropdown && (
             <View style={styles.dropdownMenu}>
-              <TouchableOpacity onPress={() => setStatus('Application Submitted')}>
+              <TouchableOpacity onPress={() => { setStatus('Application Submitted'); setShowDropdown(false); }}>
                 <Text style={[styles.dropdownOption, { backgroundColor: '#47CAFA' }]}>Application Submitted</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setStatus('OA Received')}>
+              <TouchableOpacity onPress={() => { setStatus('OA Received'); setShowDropdown(false); }}>
                 <Text style={[styles.dropdownOption, { backgroundColor: '#4177E1' }]}>OA Received</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setStatus('OA Completed')}>
+              <TouchableOpacity onPress={() => { setStatus('OA Completed'); setShowDropdown(false); }}>
                 <Text style={[styles.dropdownOption, { backgroundColor: '#2952B4' }]}>OA Completed</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setStatus('Interview')}>
+              <TouchableOpacity onPress={() => { setStatus('Interview'); setShowDropdown(false); }}>
                 <Text style={[styles.dropdownOption, { backgroundColor: '#002A8C' }]}>Interview</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setStatus('Rejected')}>
+              <TouchableOpacity onPress={() => { setStatus('Rejected'); setShowDropdown(false); }}>
                 <Text style={[styles.dropdownOption, { backgroundColor: '#DF3F64' }]}>Rejected</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setStatus('Offer')}>
+              <TouchableOpacity onPress={() => { setStatus('Offer'); setShowDropdown(false); }}>
                 <Text style={[styles.dropdownOption, { backgroundColor: '#81EE9E' }]}>Offer</Text>
               </TouchableOpacity>
             </View>
           )}
 
           <Pressable style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>Submit</Text>
+            <Text style={styles.submitButtonText}>{application ? 'Update' : 'Submit'}</Text>
           </Pressable>
         </View>
       </View>
