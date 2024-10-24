@@ -80,19 +80,6 @@ export default function History() {
             date: firestore.FieldValue.serverTimestamp(),
           });
       }
-
-      {/*
-      // Add the new application to Firestore
-      await firestore()
-        .collection('users')
-        .doc(userId)
-        .collection('applications')
-        .add({
-          ...newApplication,
-          date: firestore.FieldValue.serverTimestamp(), // Store as a Firebase Timestamp
-        });
-      */}
-
       // Close the modal after submission
       setIsModalVisible(false);
       setSelectedApp(null);  // Reset selected app
@@ -160,7 +147,7 @@ export default function History() {
         />
 
         <ScrollView style={styles.cardsContainer}>
-        {filteredApplications.map((application, index) => (
+          {filteredApplications.map((application, index) => (
             <AppCard
               key={index}
               name={application.name}
@@ -171,22 +158,8 @@ export default function History() {
               onDelete={() => handleDelete(application.id)}
             />
           ))}
-          {/*
-          {applications.map((application, index) => (
-            <AppCard
-              key={index}
-              name={application.name}
-              position={application.position}
-              date={application.date}
-              status={application.status}
-              onEdit={() => handleEdit(application)}
-              onDelete={() => handleDelete(application.id)}
-            />
-          ))}
-          */}
         </ScrollView>
 
-          
         <Pressable style={styles.button} onPress={onAddSticker}>
           <Text style={styles.text}>ADD NEW</Text>
         </Pressable>
@@ -198,7 +171,7 @@ export default function History() {
           application={selectedApp}
         />
       </View>
-    </SafeAreaView> 
+    </SafeAreaView>
   );
 }
 
